@@ -1,0 +1,14 @@
+Group 4 Mini Zoom
+
+Tasks
+1. Server/Client Functionality (Bolu & Charles)
+    - Implement server to handle 2 concurrent clients using multithreading
+2. Text & Multimedia (Kaadak, Nathan)
+    - Collect user text input and broadcast to all clients
+    - Collect files for upload and broadcast to all clients
+3. Voice call (Afeez, Tolu)
+    - Interface with system microphone to record audio
+    - Send audio data to all connected clients
+4. Video call (Tolu, Nathan, Bolu)
+    - Collect Video data with computer camera using OpenCV
+    - Send video data to all connected clients
