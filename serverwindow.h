@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "socket_lib.h"
+#include "src/socket_helper.h"
 
 namespace Ui {
 class ServerWindow;
