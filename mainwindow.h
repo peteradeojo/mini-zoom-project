@@ -5,8 +5,8 @@
 #include <QTimer>
 #include <QImage>
 #include <QPixmap>
-#include <opencv2/opencv.hpp>
 #include <QPushButton>
+#include <opencv2/opencv.hpp>
 
 #include "serverwindow.h"
 
@@ -25,7 +25,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void captureFrame();
+    // void captureFrame();
     void on_startServerButton_clicked();
 
 private:

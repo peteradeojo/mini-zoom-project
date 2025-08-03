@@ -12,7 +12,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-set(OpenCV_DIR "C:/opencv/build/x64/vc16/lib")  # Or use OpenCVConfig.cmake if available
+# set(OpenCV_DIR "/home/peter/build/opencv2")  # Or use OpenCVConfig.cmake if available
+# find_package(OpenCV REQUIRED)
+
+if (WIN32)
+    message(STATUS "Configuring for Windows")
+    set(OpenCV_DIR "C:/opencv/build/x64/vc16/lib")
+elseif (UNIX)
+    message(STATUS "Configuring for Unix")
+    set(OpenCV_DIR "/usr/include/opencv4")
+endif()
+
 find_package(OpenCV REQUIRED)
 
 set(PROJECT_SOURCES
@@ -20,6 +30,9 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        serverwindow.ui
+        serverwindow.h
+        serverwindow.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

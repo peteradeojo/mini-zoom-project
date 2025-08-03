@@ -8,46 +8,50 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // open defaut camera
-    /*cap.open(0);
+#ifdef __WIN32__
+    cap.open(0);
+#elif __linux__
+    cap.open("media/test_video.mp4");
+#endif
     if (!cap.isOpened()) {
         qDebug("Failed to open camera");
         return;
     }
 
     connect(timer, &QTimer::timeout, this, &MainWindow::captureFrame);
-    timer->start(30);*/ // 30ms interval ~33fps
+    timer->start(30); // 30ms interval ~33fps
 
     connect(ui->startServerButton, &QPushButton::clicked, this, &MainWindow::on_startServerButton_clicked);
 }
 
 MainWindow::~MainWindow() {
     delete ui;
-    cap.release();
+    // cap.release();
 }
 
-void MainWindow::captureFrame() {
-    cv::Mat frame;
-    cap >> frame;
+// void MainWindow::captureFrame() {
+//     cv::Mat frame;
+//     cap >> frame;
 
-    if (frame.empty())
-        return;
+//     if (frame.empty())
+//         return;
 
-    // Convert to RGB
-    cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+//     // Convert to RGB
+//     cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
 
-    // Convert to QImage
-    QImage img((const uchar*)frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
+//     // Convert to QImage
+//     QImage img((const uchar*)frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
 
-    // Scale image
-    QPixmap pix = QPixmap::fromImage(img).scaled(
-        ui->label->size(),
-        Qt::KeepAspectRatio,
-        Qt::SmoothTransformation
-        );
+//     // Scale image
+//     QPixmap pix = QPixmap::fromImage(img).scaled(
+//         ui->label->size(),
+//         Qt::KeepAspectRatio,
+//         Qt::SmoothTransformation
+//         );
 
-    // Show in QLabel
-    ui->label->setPixmap(pix);
-}
+//     // Show in QLabel
+//     ui->label->setPixmap(pix);
+// }
 
 void MainWindow::on_startServerButton_clicked() {
     this->hide();
