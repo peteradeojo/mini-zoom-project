@@ -1,4 +1,5 @@
 #include "../serverwindow.h"
+#include "../ui_serverwindow.h"
 
 #define DEFAULT_PORT "27015"
 
@@ -17,15 +18,23 @@ int ServerWindow::createServer() {
         printf("getaddrinfo failed: %d\n", iResult);
     }
 
-    SOCKET ListenSocket = INVALID_SOCKET;
+    server_sock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-    ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-
-    if (ListenSocket == INVALID_SOCKET) {
-        printf("Error at socket(): %ld\n", WSAGetLastError());
+    if (server_sock == INVALID_SOCKET) {
+        printf("Error at socket(): %d\n", WSAGetLastError());
         freeaddrinfo(result);
         return -1;
     }
+
+    iResult = bind(server_sock, result->ai_addr, (int)result->ai_addrlen);
+    if (iResult == SOCKET_ERROR) {
+        printf("bind failed with error: %d\n", WSAGetLastError());
+        freeaddrinfo(result);
+        ::CLOSE_SOCKET(server_sock);
+        return -1;
+    }
+
+    ui->status_label->setText("Server bind successful.");
 
     return 0;
 }

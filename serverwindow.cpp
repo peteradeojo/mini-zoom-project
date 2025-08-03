@@ -9,7 +9,7 @@ ServerWindow::ServerWindow(QWidget *parent)
     , ui(new Ui::ServerWindow)
 {
     ui->setupUi(this);
-    setupSocket();
+    // setupSocket();
     createServer();
 }
 
