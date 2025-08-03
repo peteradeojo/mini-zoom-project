@@ -2,6 +2,7 @@
 #define SERVERWINDOW_H
 
 #include <QMainWindow>
+#include <QTimer>
 
 #include "src/socket_helper.h"
 
@@ -18,9 +19,13 @@ public:
     ~ServerWindow();
     socket_t server_sock = -1;
 
+private slots:
+    void updateClients();
+
 private:
+    int connected_clients = 0;
+    QTimer *timer;
     Ui::ServerWindow *ui;
-    void setupSocket();
     int createServer();
     // void handle_client(socket_t sock);
     void startAcceptLoop();

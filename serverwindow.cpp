@@ -7,29 +7,36 @@
 ServerWindow::ServerWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ServerWindow)
+    , timer(new QTimer(this))
 {
     ui->setupUi(this);
-    // setupSocket();
     createServer();
+
+    connect(timer, &QTimer::timeout, this, &ServerWindow::updateClients);
+    // timer->start(10); // refresh 10s
 }
 
 ServerWindow::~ServerWindow()
 {
     delete ui;
-    if (server_sock != INVALID_SOCKET_FD || server_sock != INVALID_SOCKET)
-        ::CLOSE_SOCKET(server_sock);
 
+#ifdef _WIN32
+    if (server_sock != INVALID_SOCKET)
+        ::CLOSE_SOCKET(server_sock);
     WSACleanup();
+#else
+    // if (server_sock != INVALID_SOCKET_FD)
+    ::CLOSE_SOCKET(server_sock);
+#endif
 }
 
-void ServerWindow::setupSocket() {
-    server_sock = socket_helper::create_socket();
-    if (server_sock == INVALID_SOCKET_FD) {
-        std::cerr << "Failed to create socket";
-    } else {
-        QString str = "Socket created succesfully.";
-        ui->status_label->setText(str);
+void ServerWindow::updateClients() {
+    char text[64];
+    int i = sprintf(text, "Connected clients: %d", connected_clients);
+    if (i <= 0) {
+        perror("Error: ");
     }
 
-    struct sockaddr_in my_addr;
+    printf("%s\n", text); // << std::endl;
+    ui->status_label->setText(text);
 }
