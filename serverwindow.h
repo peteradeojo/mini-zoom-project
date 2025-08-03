@@ -20,7 +20,8 @@ public:
 
 private:
     Ui::ServerWindow *ui;
-    void setupServer();
+    void setupSocket();
+    int createServer();
 };
 
 #endif // SERVERWINDOW_H

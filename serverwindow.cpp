@@ -2,12 +2,15 @@
 #include "ui_serverwindow.h"
 #include <iostream>
 
+#define MYPORT 4068
+
 ServerWindow::ServerWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ServerWindow)
 {
     ui->setupUi(this);
-    setupServer();
+    setupSocket();
+    createServer();
 }
 
 ServerWindow::~ServerWindow()
@@ -17,7 +20,7 @@ ServerWindow::~ServerWindow()
         ::CLOSE_SOCKET(server_sock);
 }
 
-void ServerWindow::setupServer() {
+void ServerWindow::setupSocket() {
     server_sock = socket_helper::create_socket();
     if (server_sock == INVALID_SOCKET_FD) {
         std::cerr << "Failed to create socket";
@@ -27,8 +30,4 @@ void ServerWindow::setupServer() {
     }
 
     struct sockaddr_in my_addr;
-
-    // my_addr.sin_addr=
-
-    // bind(server_sock, )
 }
