@@ -25,7 +25,7 @@ public:
     ~MainWindow();
 
 private slots:
-    // void captureFrame();
+    void captureFrame();
     void on_startServerButton_clicked();
 
 private:
