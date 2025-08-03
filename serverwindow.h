@@ -22,6 +22,8 @@ private:
     Ui::ServerWindow *ui;
     void setupSocket();
     int createServer();
+    // void handle_client(socket_t sock);
+    void startAcceptLoop();
 };
 
 #endif // SERVERWINDOW_H

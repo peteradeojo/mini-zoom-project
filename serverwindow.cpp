@@ -16,8 +16,10 @@ ServerWindow::ServerWindow(QWidget *parent)
 ServerWindow::~ServerWindow()
 {
     delete ui;
-    if (server_sock != INVALID_SOCKET_FD)
+    if (server_sock != INVALID_SOCKET_FD || server_sock != INVALID_SOCKET)
         ::CLOSE_SOCKET(server_sock);
+
+    WSACleanup();
 }
 
 void ServerWindow::setupSocket() {
