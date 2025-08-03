@@ -7,16 +7,16 @@ MainWindow::MainWindow(QWidget *parent)
     , timer(new QTimer(this)){
     ui->setupUi(this);
 
-    // open defaut camera
-#ifdef __WIN32__
-    cap.open(0);
-#elif __linux__
-    cap.open("media/test_video.mp4");
-#endif
-    if (!cap.isOpened()) {
-        qDebug("Failed to open camera");
-        return;
-    }
+    // open default camera
+// #ifdef _WIN32
+//     cap.open(0);
+// #elif __linux__
+//     cap.open("media/test_video.mp4");
+// #endif
+//     if (!cap.isOpened()) {
+//         qDebug("Failed to open camera");
+//         return;
+//     }
 
     connect(timer, &QTimer::timeout, this, &MainWindow::captureFrame);
     timer->start(30); // 30ms interval ~33fps

@@ -12,9 +12,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-# set(OpenCV_DIR "/home/peter/build/opencv2")  # Or use OpenCVConfig.cmake if available
-# find_package(OpenCV REQUIRED)
-
 if (WIN32)
     message(STATUS "Configuring for Windows")
     set(OpenCV_DIR "C:/opencv/build/x64/vc16/lib")
@@ -33,6 +30,7 @@ set(PROJECT_SOURCES
         serverwindow.ui
         serverwindow.h
         serverwindow.cpp
+        socket_lib.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -42,6 +40,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         README.md
         tasks.txt
         serverwindow.h serverwindow.cpp serverwindow.ui
+        socket_lib.h
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET ZoomApp APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

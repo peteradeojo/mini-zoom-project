@@ -2,8 +2,8 @@
 #define SERVERWINDOW_H
 
 #include <QMainWindow>
-#include <sys/types.h>
-#include <sys/socket.h>
+
+#include "socket_lib.h"
 
 namespace Ui {
 class ServerWindow;
@@ -16,6 +16,7 @@ class ServerWindow : public QMainWindow
 public:
     explicit ServerWindow(QWidget *parent = nullptr);
     ~ServerWindow();
+    socket_t server_sock = -1;
 
 private:
     Ui::ServerWindow *ui;
