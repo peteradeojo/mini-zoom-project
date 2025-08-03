@@ -1,20 +1,58 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-{
+    , timer(new QTimer(this)){
     ui->setupUi(this);
 
-    ui->label->setText("Hello, Qt UI!");
+    // open defaut camera
+    /*cap.open(0);
+    if (!cap.isOpened()) {
+        qDebug("Failed to open camera");
+        return;
+    }
+
+    connect(timer, &QTimer::timeout, this, &MainWindow::captureFrame);
+    timer->start(30);*/ // 30ms interval ~33fps
+
+    connect(ui->startServerButton, &QPushButton::clicked, this, &MainWindow::on_startServerButton_clicked);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
+    cap.release();
 }
 
-void MainWindow::on_pushButton_clicked() {
-    // ui->centralwidget
+void MainWindow::captureFrame() {
+    cv::Mat frame;
+    cap >> frame;
+
+    if (frame.empty())
+        return;
+
+    // Convert to RGB
+    cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+
+    // Convert to QImage
+    QImage img((const uchar*)frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
+
+    // Scale image
+    QPixmap pix = QPixmap::fromImage(img).scaled(
+        ui->label->size(),
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+        );
+
+    // Show in QLabel
+    ui->label->setPixmap(pix);
+}
+
+void MainWindow::on_startServerButton_clicked() {
+    this->hide();
+    if (!serverWindow) {
+        serverWindow = new ServerWindow();
+        serverWindow->show();
+    }
 }

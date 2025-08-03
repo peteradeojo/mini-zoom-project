@@ -2,6 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTimer>
+#include <QImage>
+#include <QPixmap>
+#include <opencv2/opencv.hpp>
+#include <QPushButton>
+
+#include "serverwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,10 +24,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void captureFrame();
+    void on_startServerButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+    ServerWindow *serverWindow = nullptr; // new window instance
+    cv::VideoCapture cap;
+    QTimer *timer;
 
-private slots:
-    void on_pushButton_clicked();
 };
 #endif // MAINWINDOW_H
