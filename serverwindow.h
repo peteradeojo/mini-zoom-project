@@ -6,6 +6,8 @@
 
 #include "src/socket_helper.h"
 
+#include "src/server.h"
+
 namespace Ui {
 class ServerWindow;
 }
@@ -17,7 +19,6 @@ class ServerWindow : public QMainWindow
 public:
     explicit ServerWindow(QWidget *parent = nullptr);
     ~ServerWindow();
-    socket_t server_sock = -1;
 
 private slots:
     void updateClients();
@@ -26,9 +27,7 @@ private:
     int connected_clients = 0;
     QTimer *timer;
     Ui::ServerWindow *ui;
-    int createServer();
-    // void handle_client(socket_t sock);
-    void startAcceptLoop();
+    MiniZoom::AppServer *server;
 };
 
 #endif // SERVERWINDOW_H

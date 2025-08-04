@@ -56,7 +56,20 @@
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>Start Server</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="startServerButton_2">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>200</y>
+      <width>88</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Server</string>
     </property>
    </widget>
   </widget>
@@ -66,7 +79,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>19</height>
     </rect>
    </property>
   </widget>
