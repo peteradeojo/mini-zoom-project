@@ -4,8 +4,6 @@
 #include <QMainWindow>
 #include <QTimer>
 
-#include "src/socket_helper.h"
-
 #include "src/server.h"
 
 namespace Ui {

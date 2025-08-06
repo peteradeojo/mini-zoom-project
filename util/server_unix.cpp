@@ -5,33 +5,6 @@
 #define MYPORT 4068
 
 namespace MiniZoom {
-void handle_client(socket_t client_sock) {
-    char buffer[1024];
-
-    while(true) {
-        int bytesReceived = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
-        if (bytesReceived <= 0) break; // client disconnection or error
-
-        buffer[bytesReceived] = '\0';
-        printf("Received: %s\n", buffer);
-        printf("Ended: %d\n", strcmp(buffer, "end"));
-
-        // Strip trailing \r and \n
-        while (bytesReceived > 0 && (buffer[bytesReceived - 1] == '\n' || buffer[bytesReceived - 1] == '\r')) {
-            buffer[--bytesReceived] = '\0';
-        }
-
-        if (strcmp(buffer, "end") == 0) {
-            break;
-        }
-
-        // echo message back to client
-        send(client_sock, buffer, bytesReceived, 0);
-    }
-
-    ::CLOSE_SOCKET(client_sock);
-    printf("Client disconnected.\n");
-}
 
 int AppServer::createServer() {
     if (server_sock != INVALID_SOCKET_FD) return 1;

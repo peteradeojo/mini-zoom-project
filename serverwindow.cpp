@@ -1,6 +1,5 @@
 #include "serverwindow.h"
 #include "ui_serverwindow.h"
-#include <iostream>
 #include "src/server.h"
 
 #define MYPORT 4068

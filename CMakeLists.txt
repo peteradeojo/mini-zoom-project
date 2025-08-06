@@ -33,6 +33,9 @@ set(PROJECT_SOURCES
         serverwindow.ui
         serverwindow.h
         serverwindow.cpp
+        connectwindow.h
+        connectwindow.ui
+        connectwindow.cpp
         ${SRC_FILES}
         ${SHARED_FILES}
 )

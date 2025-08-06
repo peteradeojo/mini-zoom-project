@@ -22,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     timer->start(30); // 30ms interval ~33fps
 
     connect(ui->startServerButton, &QPushButton::clicked, this, &MainWindow::on_startServerButton_clicked);
+
+    connect(ui->connectButton, &QPushButton::clicked, this, &MainWindow::connectButton_clicked);
 }
 
 MainWindow::~MainWindow() {
@@ -58,5 +60,13 @@ void MainWindow::on_startServerButton_clicked() {
     if (!serverWindow) {
         serverWindow = new ServerWindow();
         serverWindow->show();
+    }
+}
+
+void MainWindow::connectButton_clicked() {
+    this->hide();
+    if (!connectWindow) {
+        connectWindow = new ConnectWindow();
+        connectWindow->show();
     }
 }
