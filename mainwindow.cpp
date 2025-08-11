@@ -46,13 +46,13 @@ void MainWindow::captureFrame() {
 
     // Scale image
     QPixmap pix = QPixmap::fromImage(img).scaled(
-        ui->label->size(),
+        // ui->label->size(),
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         );
 
     // Show in QLabel
-    ui->label->setPixmap(pix);
+    // ui->label->setPixmap(pix);
 }
 
 void MainWindow::on_startServerButton_clicked() {

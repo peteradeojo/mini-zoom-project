@@ -13,6 +13,11 @@ ServerWindow::ServerWindow(QWidget *parent)
 
     server = new MiniZoom::AppServer();
     if (server->createServer() > -1) {
+#ifdef _WIN32
+        server->createClient("127.0.0.1", "4068");
+#else
+        server->createClient("127.0.0,1", DEFAULT_PORT);
+#endif
         ui->status_label->setText("Server running");
     } else {
         perror("Error: ");
