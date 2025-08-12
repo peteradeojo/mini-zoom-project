@@ -12,6 +12,7 @@
 #include "serverwindow.h"
 #include "views/startchatwindow.h"
 #include "views/joinchatwindow.h"
+#include "views/startfilesharewindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,6 +32,7 @@ private slots:
     void captureFrame();
     void on_startChat();
     void on_joinChat();
+    void on_shareFiles();
 
 private:
     Ui::MainWindow *ui;
@@ -40,6 +42,7 @@ private:
 
     StartChatWindow *start_chatWindow = nullptr;
     JoinChatWindow *join_chatWindow = nullptr;
+    StartFileShareWindow *start_mediaWindow = nullptr;
 
     MiniZoom::AppServer* server;
     QThread *serverThread;

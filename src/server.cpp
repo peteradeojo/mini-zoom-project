@@ -7,9 +7,7 @@
 namespace MiniZoom {
 
 void AppServer::broadcastMessage(const std::string &msg) {
-    qDebug() << "Using mini broadcast";
     for (auto &c : clients) {
-        qDebug() << "Client " << c.socket_fd;
             int i = send(c.socket_fd, msg.c_str(), (int)msg.size(), 0);
             if (i == SOCKET_ERROR) {
 #ifdef _WIN32
@@ -22,6 +20,7 @@ void AppServer::broadcastMessage(const std::string &msg) {
 }
 
 void AppServer::broadcastMessage(const std::string &msg, socket_t sender) {
+    qDebug() << "broadcasting v2";
     for (auto &c : clients) {
         if (c.socket_fd != sender && c.status != -1) {
             int i = send(c.socket_fd, msg.c_str(), (int)msg.size(), 0);

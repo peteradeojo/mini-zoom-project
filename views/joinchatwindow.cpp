@@ -19,7 +19,7 @@ JoinChatWindow::JoinChatWindow(QWidget *parent, MiniZoom::AppServer *appserver)
             char buffer[1024];
 
             while (true) {
-                ssize_t bytes = recv(socket_fd, buffer, sizeof(buffer), 0);
+                int bytes = recv(socket_fd, buffer, sizeof(buffer), 0);
                 qDebug() << "Received " << bytes << " bytes of data";
                 if (bytes <= 0) {
                     perror("Receive error");

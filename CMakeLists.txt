@@ -25,6 +25,8 @@ endif()
 
 find_package(OpenCV REQUIRED)
 
+file(GLOB VIEW_FILES "views/*")
+
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
@@ -33,6 +35,7 @@ set(PROJECT_SOURCES
         serverwindow.ui
         serverwindow.h
         serverwindow.cpp
+        ${VIEW_FILES}
         ${SRC_FILES}
         ${SHARED_FILES}
 )
@@ -45,6 +48,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         tasks.txt
         serverwindow.h serverwindow.cpp serverwindow.ui
         ${SRC_FILES}
+        ${VIEW_FILES}
         ${SHARED_FILES}
     )
 # Define target properties for Android with Qt 6 as:
@@ -63,10 +67,6 @@ else()
             ${PROJECT_SOURCES}
             ${SHARED_FILES}
             ${SRC_FILES}
-            views/callwindow.h views/callwindow.cpp views/callwindow.ui
-            views/joincallwindow.h views/joincallwindow.cpp views/joincallwindow.ui
-            views/startchatwindow.h views/startchatwindow.cpp views/startchatwindow.ui
-            views/joinchatwindow.h views/joinchatwindow.cpp views/joinchatwindow.ui
         )
     endif()
 endif()
