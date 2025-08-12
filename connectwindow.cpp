@@ -10,14 +10,13 @@ ConnectWindow::ConnectWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->lineEdit, &QLineEdit::returnPressed, this, &ConnectWindow::on_inputReceived);
+    // connect(ui->lineEdit, &QLineEdit::returnPressed, this, &ConnectWindow::on_inputReceived);
 
-    connectToServer();
+    // connectToServer();
 }
 
 ConnectWindow::~ConnectWindow()
 {
-    WSACleanup();
     delete ui;
 }
 

@@ -4,43 +4,55 @@
 
 #define MYPORT 4068
 
-ServerWindow::ServerWindow(QWidget *parent)
+ServerWindow::ServerWindow(MiniZoom::AppServer *appserver, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ServerWindow)
     , timer(new QTimer(this))
 {
     ui->setupUi(this);
 
-    server = new MiniZoom::AppServer();
-    if (server->createServer() > -1) {
-#ifdef _WIN32
-        server->createClient("127.0.0.1", "4068");
-#else
-        server->createClient("127.0.0,1", DEFAULT_PORT);
-#endif
+    server = appserver;
+
+    MiniZoom::ClientHandler h = [this](socket_t clientSock){
+        char buffer[1024];
+        int bufferSize = sizeof(buffer);
+
+        ZeroMemory(buffer, bufferSize);
+
+        while (true) {
+            int s = recv(clientSock, buffer, bufferSize, 0);
+            if (s <= 0) {
+                std::cerr << "Receive error: " << WSAGetLastError() << "\n";
+                CLOSE_SOCKET(clientSock);
+                WSACleanup();
+                break;
+            }
+
+            std::cout << "[Client]: " << buffer << "\n";
+            server->broadcastMessage(buffer, clientSock);
+        }
+
+        CLOSE_SOCKET(clientSock);
+    };
+
+    if (server->startServer(MYPORT, h) == true) {
+        server->connectToServer("127.0.0.1", MYPORT);
         ui->status_label->setText("Server running");
     } else {
         perror("Error: ");
         ui->status_label->setText("Server initialization failed.");
     }
 
-    connect(timer, &QTimer::timeout, this, &ServerWindow::updateClients);
+    // connect(timer, &QTimer::timeout, this, &ServerWindow::updateClients);
     // timer->start(10); // refresh 10s
 }
 
 ServerWindow::~ServerWindow()
 {
-    delete ui;
-    server->closeServer();
-}
-
-void ServerWindow::updateClients() {
-    char text[64];
-    int i = sprintf(text, "Connected clients: %d", server->getConnectedClients());
-    if (i <= 0) {
-        perror("Error: ");
+    if (server) {
+        server->stopServer();
     }
-
-    printf("%s\n", text); // << std::endl;
-    ui->status_label->setText(text);
+    delete ui;
+    delete server;
 }
+

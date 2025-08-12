@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QThread>
 #include <QImage>
 #include <QPixmap>
 #include <QPushButton>
@@ -36,6 +37,9 @@ private:
     ConnectWindow *connectWindow = nullptr;
     cv::VideoCapture cap;
     QTimer *timer;
+
+    MiniZoom::AppServer* server;
+    QThread *serverThread;
 
 };
 #endif // MAINWINDOW_H

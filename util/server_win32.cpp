@@ -1,172 +1,122 @@
-#include <iostream>
-#include <thread>
 #include "../src/server.h"
 
-#define DEFAULT_PORT ("4068")
-
-struct addrinfo *result = NULL, hints;
+#include <iostream>
+#include <thread>
 
 namespace MiniZoom {
-int AppServer::createServer() {
-    WSADATA wsa;
-
-    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
-        perror("Error: ");
-        std::cerr << "WSAStartup failed\n";
-        return -1;
+AppServer::AppServer(): server_fd(INVALID_SOCKET_FD) {
+    WSAData wsa;
+    int res = WSAStartup(MAKEWORD(2,2), &wsa);
+    if (res != 0) {
+        std::cerr << "WSA Startup failed: " << res << "\n";
     }
-
-    // clear memory
-    ZeroMemory(&hints, sizeof (hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-    hints.ai_flags = AI_PASSIVE;
-
-    char node[64] = "127.0.0.1";
-
-    // Resolve the local address and port to be used by the server
-    int iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
-    if (iResult != 0) {
-        printf("getaddrinfo failed: %d\n", iResult);
-    }
-
-    server_sock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-
-    if (server_sock == INVALID_SOCKET) {
-        printf("Error at socket(): %d\n", WSAGetLastError());
-        freeaddrinfo(result);
-
-        return -1;
-    }
-
-    iResult = bind(server_sock, result->ai_addr, (int)result->ai_addrlen);
-    if (iResult == SOCKET_ERROR) {
-        printf("bind failed with error: %d\n", WSAGetLastError());
-        freeaddrinfo(result);
-        ::CLOSE_SOCKET(server_sock);
-
-        return -1;
-    }
-
-    if (listen(server_sock, MAX_CLIENTS) == SOCKET_ERROR) {
-        printf("Socket listen failed with error: %d\n", WSAGetLastError());
-        ::CLOSE_SOCKET(server_sock);
-
-        return -1;
-    }
-
-    sockaddr_in localAddr;
-    int addrLen = sizeof(localAddr);
-
-    if (getsockname(server_sock, (SOCKADDR*)&localAddr, &addrLen) == 0) {
-        char ipStr[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &(localAddr.sin_addr), ipStr, sizeof(ipStr));
-
-        int port = ntohs(localAddr.sin_port);
-        printf("Listening on %s:%d", ipStr, port);
-    } else {
-        std::cerr << "getsockname failed: " << WSAGetLastError() << std::endl;
-        return -1;
-    }
-
-    std::thread([this]() {
-        startAcceptLoop();
-    }).detach();
-
-    return 0;
 }
 
-void AppServer::startAcceptLoop() {
-    try {
-        while (true) {
-            std::cout << "Starting accept connections" << std::endl;
-            sockaddr_in client_addr;
-            int client_size = sizeof(client_addr);
-            socket_t client_sock = accept(server_sock, (sockaddr*)&client_addr, &client_size);
-            if (client_sock == INVALID_SOCKET) {
-                perror("Error occurred: ");
-                printf("Accept failed: %d\n", WSAGetLastError());
-                continue;
-            }
+AppServer::~AppServer() {
+    stopServer();
+    WSACleanup();
+}
 
-            // Spawn a new thread for each client
-            // std::thread t(handle_client, client_sock);
-            std::lock_guard<std::mutex> lock(clients_mutex);
-            CxClient ci;
-            ci.socket_fd = client_sock;
-            clients.push_back(ci);
+bool AppServer::startServer(int port, ClientHandler handler) {
+    clientHandler = handler;
+    server_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (server_fd == INVALID_SOCKET_FD) {
+        std::cerr << "Server socket creation error: " << WSAGetLastError() << std::endl;
+        return false;
+    }
 
-            std::thread([this, client_sock]() {
-                this->handleClient(client_sock);
-            }).detach();
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(port);
+
+    if (bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
+        std::cerr << "Server socket bind error: " << WSAGetLastError() << std::endl;
+        CLOSE_SOCKET(server_fd);
+        return false;
+    }
+
+    if (listen(server_fd, MAX_CLIENTS) == SOCKET_ERROR) {
+        std::cerr << "listen error: " << WSAGetLastError() << std::endl;
+        CLOSE_SOCKET(server_fd);
+        return false;
+    }
+
+    std::thread(&AppServer::acceptClients, this).detach();
+
+    std::cout << "Server listening on port " << port << "\n";
+    return true;
+}
+
+void AppServer::stopServer() {
+    for (auto &c : clients) {
+        closesocket(c.socket_fd);
+    }
+    for (auto &c : outgoingConnections) {
+        closesocket(c.socket_fd);
+    }
+    if (server_fd != INVALID_SOCKET) {
+        closesocket(server_fd);
+    }
+    clients.clear();
+    outgoingConnections.clear();
+}
+
+void AppServer::acceptClients() {
+    sockaddr_in client_addr;
+    int addrlen = sizeof(client_addr);
+
+    while(true) {
+        socket_t new_sock = accept(server_fd, (sockaddr*)&client_addr, &addrlen);
+        if (new_sock != INVALID_SOCKET) {
+            CxClient client{new_sock, 1};
+            clients.push_back(client);
+
+            std::thread(clientHandler, new_sock).detach();
+
+            char clientIP[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(client_addr.sin_addr), clientIP, INET_ADDRSTRLEN);
+            std::cout << "New client connected: " << clientIP << "\n";
         }
-    } catch (const std::exception& ex) {
-        std::cerr << "Exception in accept loop: " << ex.what() << std::endl;
     }
 }
 
-int AppServer::closeServer() {
-    return 1;
-}
-
-int AppServer::createClient(const std::string &serverIP, const std::string &serverPort) {
-    WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        std::cerr << "WSAStartup failed\n";
-        return -1;
-    }
-
-    struct addrinfo *addr_result = nullptr;
-    struct addrinfo hints_client;
-    ZeroMemory(&hints_client, sizeof(hints_client));
-    hints_client.ai_family = AF_INET;
-    hints_client.ai_socktype = SOCK_STREAM;
-    hints_client.ai_protocol = IPPROTO_TCP;
-
-    int iResult = getaddrinfo(serverIP.c_str(), serverPort.c_str(), &hints_client, &addr_result);
-    if (iResult != 0) {
-        std::cerr << "getaddrinfo failed: " << iResult << "\n";
-        return -1;
-    }
-
-    socket_t clientSocket = socket(addr_result->ai_family, addr_result->ai_socktype, addr_result->ai_protocol);
-    if (clientSocket == INVALID_SOCKET) {
-        std::cerr << "Client socket creation failed: " << WSAGetLastError() << "\n";
-        freeaddrinfo(addr_result);
-        return -1;
-    }
-
-    iResult = connect(clientSocket, addr_result->ai_addr, (int)addr_result->ai_addrlen);
-    freeaddrinfo(addr_result);
-
-    if (iResult == SOCKET_ERROR) {
-        std::cerr << "Unable to connect to server: " << WSAGetLastError() << "\n";
-        CLOSE_SOCKET(clientSocket);
-        return -1;
-    }
-
-    std::cout << "Connected to server at " << serverIP << ":" << serverPort << "[" << clientSocket << "]\n";
-
-    CxClient ci;
-    ci.socket_fd = clientSocket;
-    clients.push_back(ci);
-
-    // Optionally, start listening to incoming messages from this connection
-    std::thread([clientSocket, this]() {
-        char buffer[1024];
-        while (true) {
-            int bytes = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-            if (bytes <= 0) {
-                removeClient(clientSocket);
-                break;
+void AppServer::broadcastMessage(const std::string &msg, socket_t sender) {
+    for (auto &c : clients) {
+        if (c.socket_fd != sender && c.status != -1) {
+            int i = send(c.socket_fd, msg.c_str(), (int)msg.size(), 0);
+            if (i == SOCKET_ERROR) {
+                std::cerr << "Send Error: " << WSAGetLastError() << "\n";
             }
-            buffer[bytes] = '\0';
-            std::cout << "[Server Reply]: " << buffer << "\n";
         }
-        CLOSE_SOCKET(clientSocket);
-    }).detach();
+    }
+}
 
-    return 0;
+bool AppServer::connectToServer(const std::string &ip, int port) {
+    socket_t sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sock == INVALID_SOCKET_FD) {
+        std::cerr << "socket failed: " << WSAGetLastError() << "\n";
+        return false;
+    }
+
+    sockaddr_in serv_addr{};
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+
+    if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
+        std::cerr << "Invalid address\n";
+        closesocket(sock);
+        return false;
+    }
+
+    if (connect(sock, (sockaddr*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
+        std::cerr << "connect failed: " << WSAGetLastError() << "\n";
+        closesocket(sock);
+        return false;
+    }
+
+    CxClient conn{sock, 1};
+    outgoingConnections.push_back(conn);
+    std::cout << "Connected to server at " << ip << ":" << port << "\n";
+    return true;
 }
 }

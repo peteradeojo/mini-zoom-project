@@ -1,45 +1,41 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <vector>
 #include <string>
-#include <mutex>
-//server.h defines generic server implementation
+#include <vector>
+#include <functional>
 #include "socket_helper.h"
 
 #define MAX_CLIENTS 4
 
-namespace MiniZoom{
-
+namespace MiniZoom {
 struct CxClient {
     socket_t socket_fd;
-    short int status;
+    int status;
+    bool sendEnabled;
 };
 
-class AppServer {
+using ClientHandler = std::function<void(socket_t)>;
+
+class AppServer{
+
 public:
     AppServer();
     ~AppServer();
-    int createServer();
-    int closeServer();
-    short int getConnectedClients() const;
-    void handleClient(socket_t client_sock);
-    void removeClient(int sock);
-    int createClient(const std::string &serverIP, const std::string &serverPort);
-    int createClient(const std::string &serverIP, const int serverPort);
-    // int clients[MAX_CLIENTS] = {};
+    bool startServer(int port, ClientHandler handler);
+    void stopServer();
 
-    // CxClient* root_client;
-    std::vector<CxClient> clients;
-    std::mutex clients_mutex;
+    void acceptClients();
+    void broadcastMessage(const std::string &msg, socket_t sender);
+    bool connectToServer(const std::string &ip, const int port);
 
 private:
-    socket_t server_sock = -1;
-    short int connected_clients = 0;
-    void startAcceptLoop();
-    void broadcastMessage(const std::string msg, socket_t sender);
+    socket_t server_fd;
+    sockaddr_in server_addr;
+    std::vector<CxClient> clients;
+    std::vector<CxClient> outgoingConnections;
+    ClientHandler clientHandler;
 };
 }
 
-
-#endif // SERVER_H
+#endif

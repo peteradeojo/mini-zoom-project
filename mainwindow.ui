@@ -20,69 +20,176 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <widget class="QLabel" name="label_2">
+   <widget class="QGroupBox" name="VideoGroup">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>200</y>
+      <width>131</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Video</string>
+    </property>
+    <widget class="QPushButton" name="initVideoBtn">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start Video Call</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="joinVcBtn">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Join Video Call</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="TextGroup">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>200</y>
+      <width>131</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Text</string>
+    </property>
+    <widget class="QPushButton" name="initTextChat">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start Chat</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="joinTextChat">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Join Chat</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="VoiceGroup">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>200</y>
+      <width>131</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Voice</string>
+    </property>
+    <widget class="QPushButton" name="initVoice">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Start Voice Call</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="joinVoiceCall">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Join Voice Call</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="FilesGroup">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>200</y>
+      <width>131</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Files</string>
+    </property>
+    <widget class="QPushButton" name="sendFiles">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Send Files</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="joinVcBtn_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Receive Files</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>190</y>
-      <width>111</width>
+      <y>150</y>
+      <width>211</width>
       <height>19</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start Voice Call</string>
+     <string>Group 4 Zoom</string>
     </property>
-   </widget>
-   <widget class="QPushButton" name="startServerButton">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>180</y>
-      <width>88</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Start Server</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="connectButton">
-    <property name="geometry">
-     <rect>
-      <x>520</x>
-      <y>180</y>
-      <width>131</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Connect to Server</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="initVideoBtn">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>180</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Start Video Call</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="joinVcBtn">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>260</y>
-      <width>111</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Join Video Call</string>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
   </widget>
@@ -95,6 +202,12 @@
      <height>24</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuGroup_4">
+    <property name="title">
+     <string>Group 4</string>
+    </property>
+   </widget>
+   <addaction name="menuGroup_4"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

@@ -15,11 +15,11 @@ class ServerWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit ServerWindow(QWidget *parent = nullptr);
+    explicit ServerWindow(MiniZoom::AppServer* appserver, QWidget *parent = nullptr);
     ~ServerWindow();
 
 private slots:
-    void updateClients();
+    // void updateClients();
 
 private:
     int connected_clients = 0;

@@ -4,7 +4,10 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , timer(new QTimer(this)){
+    , timer(new QTimer(this))
+    , server(nullptr)
+    , serverThread(nullptr)
+{
     ui->setupUi(this);
 
     // open default camera
@@ -27,8 +30,17 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
+    if (server) {
+        server->stopServer();
+        delete server;
+    }
+    if (serverThread) {
+        serverThread->quit();
+        serverThread->wait();
+        delete serverThread;
+    }
     delete ui;
-    cap.release();
+    // cap.release();
 }
 
 void MainWindow::captureFrame() {
@@ -58,7 +70,9 @@ void MainWindow::captureFrame() {
 void MainWindow::on_startServerButton_clicked() {
     this->hide();
     if (!serverWindow) {
-        serverWindow = new ServerWindow();
+        server = new MiniZoom::AppServer();
+
+        serverWindow = new ServerWindow(server);
         serverWindow->show();
     }
 }
