@@ -79,44 +79,4 @@ void AppServer::acceptClients() {
         }
     }
 }
-
-void AppServer::broadcastMessage(const std::string &msg, socket_t sender) {
-    for (auto &c : clients) {
-        if (c.socket_fd != sender && c.status != -1) {
-            int i = send(c.socket_fd, msg.c_str(), (int)msg.size(), 0);
-            if (i == SOCKET_ERROR) {
-                std::cerr << "Send Error: " << WSAGetLastError() << "\n";
-            }
-        }
-    }
-}
-
-bool AppServer::connectToServer(const std::string &ip, int port) {
-    socket_t sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sock == INVALID_SOCKET_FD) {
-        std::cerr << "socket failed: " << WSAGetLastError() << "\n";
-        return false;
-    }
-
-    sockaddr_in serv_addr{};
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
-
-    if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
-        std::cerr << "Invalid address\n";
-        closesocket(sock);
-        return false;
-    }
-
-    if (connect(sock, (sockaddr*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
-        std::cerr << "connect failed: " << WSAGetLastError() << "\n";
-        closesocket(sock);
-        return false;
-    }
-
-    CxClient conn{sock, 1};
-    outgoingConnections.push_back(conn);
-    std::cout << "Connected to server at " << ip << ":" << port << "\n";
-    return true;
-}
 }

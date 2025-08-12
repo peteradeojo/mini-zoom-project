@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QPushButton>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -10,23 +12,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // open default camera
-// #ifdef _WIN32
-//     cap.open(0);
-// #elif __linux__
-//     cap.open("media/test_video.mp4");
-// #endif
-//     if (!cap.isOpened()) {
-//         qDebug("Failed to open camera");
-//         return;
-//     }
+    // connect(timer, &QTimer::timeout, this, &MainWindow::captureFrame);
+    // timer->start(30); // 30ms interval ~33fps
 
-    connect(timer, &QTimer::timeout, this, &MainWindow::captureFrame);
-    timer->start(30); // 30ms interval ~33fps
-
-    connect(ui->startServerButton, &QPushButton::clicked, this, &MainWindow::on_startServerButton_clicked);
-
-    connect(ui->connectButton, &QPushButton::clicked, this, &MainWindow::connectButton_clicked);
+    connect(ui->initTextChat, &QPushButton::clicked, this, &MainWindow::on_startChat);
+    connect(ui->joinTextChat, &QPushButton::clicked, this, &MainWindow::on_joinChat);
 }
 
 MainWindow::~MainWindow() {
@@ -34,13 +24,13 @@ MainWindow::~MainWindow() {
         server->stopServer();
         delete server;
     }
+
     if (serverThread) {
         serverThread->quit();
         serverThread->wait();
         delete serverThread;
     }
     delete ui;
-    // cap.release();
 }
 
 void MainWindow::captureFrame() {
@@ -67,20 +57,24 @@ void MainWindow::captureFrame() {
     // ui->label->setPixmap(pix);
 }
 
-void MainWindow::on_startServerButton_clicked() {
+void MainWindow::on_startChat() {
     this->hide();
-    if (!serverWindow) {
-        server = new MiniZoom::AppServer();
-
-        serverWindow = new ServerWindow(server);
-        serverWindow->show();
+    if (!start_chatWindow) {
+        if (server == NULL) {
+            server = new MiniZoom::AppServer();
+        }
+        start_chatWindow = new StartChatWindow(this, server);
+        start_chatWindow->show();
     }
 }
 
-void MainWindow::connectButton_clicked() {
+void MainWindow::on_joinChat() {
     this->hide();
-    if (!connectWindow) {
-        connectWindow = new ConnectWindow();
-        connectWindow->show();
+    if (!join_chatWindow) {
+        if (server == NULL) {
+            server = new MiniZoom::AppServer();
+        }
+        join_chatWindow = new JoinChatWindow(this, server);
+        join_chatWindow->show();
     }
 }

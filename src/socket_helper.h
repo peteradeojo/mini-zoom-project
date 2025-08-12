@@ -23,6 +23,7 @@ typedef SOCKET socket_t;
 
 typedef int socket_t;
 #define INVALID_SOCKET_FD (-1)
+#define SOCKET_ERROR (-1)
 #define CLOSE_SOCKET(s) close(s)
 #endif
 

@@ -33,9 +33,6 @@ set(PROJECT_SOURCES
         serverwindow.ui
         serverwindow.h
         serverwindow.cpp
-        connectwindow.h
-        connectwindow.ui
-        connectwindow.cpp
         ${SRC_FILES}
         ${SHARED_FILES}
 )
@@ -66,6 +63,10 @@ else()
             ${PROJECT_SOURCES}
             ${SHARED_FILES}
             ${SRC_FILES}
+            views/callwindow.h views/callwindow.cpp views/callwindow.ui
+            views/joincallwindow.h views/joincallwindow.cpp views/joincallwindow.ui
+            views/startchatwindow.h views/startchatwindow.cpp views/startchatwindow.ui
+            views/joinchatwindow.h views/joinchatwindow.cpp views/joinchatwindow.ui
         )
     endif()
 endif()

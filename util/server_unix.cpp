@@ -5,83 +5,66 @@
 #define MYPORT 4068
 
 namespace MiniZoom {
+AppServer::AppServer(): server_fd(INVALID_SOCKET_FD) {}
 
-int AppServer::createServer() {
-    if (server_sock != INVALID_SOCKET_FD) return 1;
+AppServer::~AppServer() {}
 
-    struct sockaddr_in myaddr;
+bool AppServer::startServer(int port, ClientHandler handler) {
+    clientHandler = handler;
 
-    myaddr.sin_family = AF_INET;
-    myaddr.sin_port = htons(MYPORT);
-    myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    // myaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    memset(&(myaddr.sin_zero), '\0', 8);
-
-    // get socket
-    server_sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_sock == INVALID_SOCKET_FD) {
-        perror("An error occurred: ");
-        return -1;
-    }
-
-    int opt = 1;
-    if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        perror("setsockopt failed");
-        ::close(server_sock);
-        return -1;
-    }
-
-    // bind
-    int bindResult = bind(server_sock, (struct sockaddr *)&myaddr, sizeof(sockaddr));
-    if (bindResult == -1) {
-        perror("Error:");
-        return -1;
-    }
-
-    printf("Got past binding stage \n");
-    // listen
-    if (listen(server_sock, 4) == -1) {
+    server_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (server_fd == INVALID_SOCKET_FD) {
         perror("Error: ");
-        return -1;
+        return false;
     }
 
-    // start accepting in a mulithread
-    std::thread([this]() {
-        startAcceptLoop();
-    }).detach();
+    int iRes;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    return 1;
+    int optval = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+
+    iRes = bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr));
+    if (iRes == SOCKET_ERROR) {
+        perror("Socket bind error: ");
+        ::CLOSE_SOCKET(server_fd);
+        return false;
+    }
+
+    iRes = listen(server_fd, MAX_CLIENTS);
+    if (iRes == SOCKET_ERROR) {
+        perror("Listen error");
+        ::CLOSE_SOCKET(server_fd);
+        return false;
+    }
+
+    std::thread(&AppServer::acceptClients, this).detach();
+    return true;
 }
 
-int AppServer::closeServer() {
-    ::close(server_sock);
-    return 1;
+void AppServer::stopServer() {
+    ::CLOSE_SOCKET(server_fd);
 }
 
-void AppServer::startAcceptLoop() {
-    try {
-        printf("Starting accept loop\n");
-        while (true) {
-            sockaddr_in client_addr;
-            socklen_t client_size = sizeof(client_addr);
-            socket_t client_sock = accept((int) server_sock, (sockaddr*)&client_addr, &client_size);
+void AppServer::acceptClients() {
+    sockaddr_in client_addr;
+    socklen_t addrlen = sizeof(client_addr);
 
-            if (client_sock == INVALID_SOCKET_FD) {
-                perror("Error occurred: ");
-                continue;
-            }
+    while(true) {
+        socket_t new_sock = accept(server_fd, (sockaddr*)&client_addr, &addrlen);
+        if (new_sock != INVALID_SOCKET_FD) {
+            CxClient client{new_sock, 1};
+            clients.push_back(client);
 
-            printf("Connected a client\n");
+            std::thread(clientHandler, new_sock).detach();
 
-            connected_clients++;
-
-            // Spawn a new thread for each client
-            std::thread([this, client_sock]() {
-                this->handleClient(client_sock);
-            }).detach();
+            char clientIP[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(client_addr.sin_addr), clientIP, INET_ADDRSTRLEN);
+            std::cout << "New client connected: " << clientIP << "\n";
         }
-    } catch (const std::exception& ex) {
-        std::cerr << ex.what() << std::endl;
     }
 }
+
 }

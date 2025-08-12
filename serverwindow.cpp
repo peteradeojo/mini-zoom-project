@@ -17,14 +17,22 @@ ServerWindow::ServerWindow(MiniZoom::AppServer *appserver, QWidget *parent)
         char buffer[1024];
         int bufferSize = sizeof(buffer);
 
+#ifdef _WIN32
         ZeroMemory(buffer, bufferSize);
+#else
+        memset(buffer, bufferSize, bufferSize);
+#endif
 
         while (true) {
             int s = recv(clientSock, buffer, bufferSize, 0);
             if (s <= 0) {
+                ::CLOSE_SOCKET(clientSock);
+#ifdef _WIN32
                 std::cerr << "Receive error: " << WSAGetLastError() << "\n";
-                CLOSE_SOCKET(clientSock);
                 WSACleanup();
+#else
+                perror("Receive error: ");
+#endif
                 break;
             }
 
@@ -32,7 +40,7 @@ ServerWindow::ServerWindow(MiniZoom::AppServer *appserver, QWidget *parent)
             server->broadcastMessage(buffer, clientSock);
         }
 
-        CLOSE_SOCKET(clientSock);
+        ::CLOSE_SOCKET(clientSock);
     };
 
     if (server->startServer(MYPORT, h) == true) {
