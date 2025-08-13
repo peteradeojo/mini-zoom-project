@@ -3,6 +3,9 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QString>
+#include <QDir>
+#include <QStandardPaths>
 
 JoinFileShareWindow::JoinFileShareWindow(QWidget *parent, MiniZoom::AppServer *a_client)
     : QMainWindow(parent)
@@ -11,6 +14,7 @@ JoinFileShareWindow::JoinFileShareWindow(QWidget *parent, MiniZoom::AppServer *a
     ui->setupUi(this);
 
     connect(this, &JoinFileShareWindow::dataReceived, this, &JoinFileShareWindow::onDataReceived);
+    connect(this, &JoinFileShareWindow::fileReceived, this, &JoinFileShareWindow::onFileReceived);
 
     client = a_client;
     client->connectToServer("127.0.0.1", 4068);
@@ -23,7 +27,8 @@ JoinFileShareWindow::JoinFileShareWindow(QWidget *parent, MiniZoom::AppServer *a
             int iRes = recv(client_sock, buffer, sizeof(buffer), 0);
             if (iRes <= 0) {
                 perror("receive error");
-                continue;
+                ::CLOSE_SOCKET(client_sock);
+                break;
             }
 
             QByteArray data = QByteArray::fromRawData(buffer, iRes);
@@ -45,20 +50,38 @@ void JoinFileShareWindow::onDataReceived(const QByteArray data) {
     if (data.startsWith("FILE-OPEN")) {
         // Parse header
         QList<QByteArray> parts = data.split(':');
-        QString filename = parts[1];
+        QString originalFilename = QString::fromUtf8(parts[1]);
         remaining = parts[2].toLongLong();
-        file.setFileName(filename);
 
-        qDebug() << "File name: " << parts[1];
-        file.open(QIODevice::WriteOnly);
+        // Get the user's Downloads folder
+        QString downloadsPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+        if (downloadsPath.isEmpty() || QDir(downloadsPath).exists() == false) {
+            downloadsPath = QDir::homePath(); // fallback if no Downloads folder found
+        }
+
+        // Construct full path with original filename
+        QString fullPath = QDir(downloadsPath).filePath(originalFilename);
+        qDebug() << "Saving file to: " << fullPath;
+
+        file.setFileName(fullPath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << "Could not open file for writing:" << file.errorString();
+            return;
+        }
+    } else if (data.compare("FILE:END") == 0) {
+        file.close();
+        emit fileReceived(file.fileName().toStdString());
+        return;
     } else {
         file.write(data);
         remaining -= data.size();
-        qDebug() << "Data: " << data;
         qDebug() << "Remaining: " << remaining;
-        // if (remaining <= 0) {
-        //     file.close();
-        //     qDebug() << "File received!";
-        // }
     }
+}
+
+void JoinFileShareWindow::onFileReceived(const std::string filename) {
+    qDebug() << "Successfully received: " << filename.c_str();
+
+    QString update = QString("Received file: %1").arg(QString(filename.c_str()).toHtmlEscaped());
+    ui->textBrowser->append(update);
 }

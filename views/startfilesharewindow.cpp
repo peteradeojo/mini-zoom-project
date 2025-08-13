@@ -49,7 +49,7 @@ void StartFileShareWindow::sendFileToClients(const QString &filePath) {
                             .arg(file.size())
                             .toUtf8();
 
-    int c;
+    int c = 0;
     if (server->outgoingConnections.empty()) {
         server->broadcastMessage(header.constData());
     } else {
@@ -58,17 +58,21 @@ void StartFileShareWindow::sendFileToClients(const QString &filePath) {
     }
 
     QByteArray buffer;
-    if (server->outgoingConnections.empty()) {
+    if (c != 0) {
         while (!(buffer = file.read(4096)).isEmpty()) {
+            qDebug() << buffer;
             server->broadcastMessage(buffer.constData());
         }
     } else {
         while (!(buffer = file.read(4096)).isEmpty()) {
+            qDebug() << buffer;
             server->broadcastMessage(buffer.constData(), c);
         }
     }
 
     server->broadcastMessage("FILE:END", c);
+
+    ui->textBrowser->setText(QString("%1 sent succesfully").arg(info.fileName()));
 }
 
 void StartFileShareWindow::handleIncomingFile(socket_t client_fd, const QByteArray &data) {

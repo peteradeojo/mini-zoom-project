@@ -20,7 +20,6 @@ void AppServer::broadcastMessage(const std::string &msg) {
 }
 
 void AppServer::broadcastMessage(const std::string &msg, socket_t sender) {
-    qDebug() << msg;
     for (auto &c : clients) {
         if (c.socket_fd != sender && c.status != -1) {
             int i = send(c.socket_fd, msg.c_str(), (int)msg.size(), 0);

@@ -24,9 +24,11 @@ private:
 
 private slots:
     void onDataReceived(const QByteArray data);
+    void onFileReceived(const std::string filename);
 
 signals:
     void dataReceived(const QByteArray data);
+    void fileReceived(const std::string filename);
 };
 
 #endif // JOINFILESHAREWINDOW_H
