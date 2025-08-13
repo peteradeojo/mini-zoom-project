@@ -23,10 +23,10 @@ private:
     MiniZoom::AppServer *client;
 
 private slots:
-    void onDataReceived(const QByteArray &data);
+    void onDataReceived(const QByteArray data);
 
 signals:
-    void dataReceived(const QByteArray &data);
+    void dataReceived(const QByteArray data);
 };
 
 #endif // JOINFILESHAREWINDOW_H

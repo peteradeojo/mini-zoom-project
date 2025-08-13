@@ -162,7 +162,7 @@
       <string>Send Files</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="joinVcBtn_4">
+    <widget class="QPushButton" name="joinMedia">
      <property name="geometry">
       <rect>
        <x>10</x>

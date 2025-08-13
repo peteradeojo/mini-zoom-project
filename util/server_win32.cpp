@@ -29,6 +29,14 @@ bool AppServer::startServer(int port, ClientHandler handler) {
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(port);
 
+    int optval = 1;
+    int optRes = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char*) &optval, sizeof(bool));
+    if (optRes == SOCKET_ERROR) {
+        std::cerr << "setsockopt failed with error: " << WSAGetLastError() << "\n";
+        ::CLOSE_SOCKET(server_fd);
+        return false;
+    }
+
     if (bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
         std::cerr << "Server socket bind error: " << WSAGetLastError() << std::endl;
         CLOSE_SOCKET(server_fd);

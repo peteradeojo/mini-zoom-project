@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->initTextChat, &QPushButton::clicked, this, &MainWindow::on_startChat);
     connect(ui->joinTextChat, &QPushButton::clicked, this, &MainWindow::on_joinChat);
     connect(ui->sendFiles, &QPushButton::clicked, this, &MainWindow::on_shareFiles);
+    connect(ui->joinMedia, &QPushButton::clicked, this, &MainWindow::on_joinFiles);
 }
 
 MainWindow::~MainWindow() {
@@ -88,5 +89,16 @@ void MainWindow::on_shareFiles() {
         }
         start_mediaWindow = new StartFileShareWindow(this, server);
         start_mediaWindow->show();
+    }
+}
+
+void MainWindow::on_joinFiles() {
+    this->hide();
+    if (!join_mediaWindow) {
+        if (server == NULL) {
+            server = new MiniZoom::AppServer();
+        }
+        join_mediaWindow = new JoinFileShareWindow(this, server);
+        join_mediaWindow->show();
     }
 }

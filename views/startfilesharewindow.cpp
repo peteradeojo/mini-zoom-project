@@ -16,12 +16,15 @@ StartFileShareWindow::StartFileShareWindow(QWidget *parent, MiniZoom::AppServer 
 
     server = appserver;
 
-    server->startServer(4545, [this](socket_t client_fd) {
+    bool started = server->startServer(4068, [this](socket_t client_fd) {
         const QByteArray data = NULL;
         handleIncomingFile(client_fd, data);
     });
-
-    server->connectToServer("127.0.0.1", 4545);
+    if (started) {
+        server->connectToServer("127.0.0.1", 4068);
+    } else {
+        this->close();
+    }
 
     connect(ui->selectFileButton, &QPushButton::clicked, this, &StartFileShareWindow::onSelectFile);
 }
@@ -41,7 +44,7 @@ void StartFileShareWindow::sendFileToClients(const QString &filePath) {
 
     QFileInfo info(filePath);
     qDebug() << info;
-    QByteArray header = QString("FILE:%1:%2")
+    QByteArray header = QString("FILE-OPEN:%1:%2")
                             .arg(info.fileName())
                             .arg(file.size())
                             .toUtf8();
