@@ -60,12 +60,10 @@ void StartFileShareWindow::sendFileToClients(const QString &filePath) {
     QByteArray buffer;
     if (c != 0) {
         while (!(buffer = file.read(4096)).isEmpty()) {
-            qDebug() << buffer;
             server->broadcastMessage(buffer.constData());
         }
     } else {
         while (!(buffer = file.read(4096)).isEmpty()) {
-            qDebug() << buffer;
             server->broadcastMessage(buffer.constData(), c);
         }
     }
