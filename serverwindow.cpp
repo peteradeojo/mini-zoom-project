@@ -1,42 +1,66 @@
 #include "serverwindow.h"
 #include "ui_serverwindow.h"
-#include <iostream>
+#include "src/server.h"
 
 #define MYPORT 4068
 
-ServerWindow::ServerWindow(QWidget *parent)
+ServerWindow::ServerWindow(MiniZoom::AppServer *appserver, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ServerWindow)
     , timer(new QTimer(this))
 {
     ui->setupUi(this);
-    createServer();
 
-    connect(timer, &QTimer::timeout, this, &ServerWindow::updateClients);
+    server = appserver;
+
+    MiniZoom::ClientHandler h = [this](socket_t clientSock){
+        char buffer[1024];
+        int bufferSize = sizeof(buffer);
+
+#ifdef _WIN32
+        ZeroMemory(buffer, bufferSize);
+#else
+        memset(buffer, bufferSize, bufferSize);
+#endif
+
+        while (true) {
+            int s = recv(clientSock, buffer, bufferSize, 0);
+            if (s <= 0) {
+                ::CLOSE_SOCKET(clientSock);
+#ifdef _WIN32
+                std::cerr << "Receive error: " << WSAGetLastError() << "\n";
+                WSACleanup();
+#else
+                perror("Receive error: ");
+#endif
+                break;
+            }
+
+            std::cout << "[Client]: " << buffer << "\n";
+            server->broadcastMessage(buffer, clientSock);
+        }
+
+        ::CLOSE_SOCKET(clientSock);
+    };
+
+    if (server->startServer(MYPORT, h) == true) {
+        server->connectToServer("127.0.0.1", MYPORT);
+        ui->status_label->setText("Server running");
+    } else {
+        perror("Error: ");
+        ui->status_label->setText("Server initialization failed.");
+    }
+
+    // connect(timer, &QTimer::timeout, this, &ServerWindow::updateClients);
     // timer->start(10); // refresh 10s
 }
 
 ServerWindow::~ServerWindow()
 {
-    delete ui;
-
-#ifdef _WIN32
-    if (server_sock != INVALID_SOCKET)
-        ::CLOSE_SOCKET(server_sock);
-    WSACleanup();
-#else
-    // if (server_sock != INVALID_SOCKET_FD)
-    ::CLOSE_SOCKET(server_sock);
-#endif
-}
-
-void ServerWindow::updateClients() {
-    char text[64];
-    int i = sprintf(text, "Connected clients: %d", connected_clients);
-    if (i <= 0) {
-        perror("Error: ");
+    if (server) {
+        server->stopServer();
     }
-
-    printf("%s\n", text); // << std::endl;
-    ui->status_label->setText(text);
+    delete ui;
+    delete server;
 }
+

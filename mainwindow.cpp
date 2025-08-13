@@ -1,32 +1,38 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QPushButton>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , timer(new QTimer(this)){
+    , timer(new QTimer(this))
+    , server(nullptr)
+    , serverThread(nullptr)
+{
     ui->setupUi(this);
 
-    // open default camera
-// #ifdef _WIN32
-//     cap.open(0);
-// #elif __linux__
-//     cap.open("media/test_video.mp4");
-// #endif
-//     if (!cap.isOpened()) {
-//         qDebug("Failed to open camera");
-//         return;
-//     }
+    // connect(timer, &QTimer::timeout, this, &MainWindow::captureFrame);
+    // timer->start(30); // 30ms interval ~33fps
 
-    connect(timer, &QTimer::timeout, this, &MainWindow::captureFrame);
-    timer->start(30); // 30ms interval ~33fps
-
-    connect(ui->startServerButton, &QPushButton::clicked, this, &MainWindow::on_startServerButton_clicked);
+    connect(ui->initTextChat, &QPushButton::clicked, this, &MainWindow::on_startChat);
+    connect(ui->joinTextChat, &QPushButton::clicked, this, &MainWindow::on_joinChat);
+    connect(ui->sendFiles, &QPushButton::clicked, this, &MainWindow::on_shareFiles);
+    connect(ui->joinMedia, &QPushButton::clicked, this, &MainWindow::on_joinFiles);
 }
 
 MainWindow::~MainWindow() {
+    if (server) {
+        server->stopServer();
+        delete server;
+    }
+
+    if (serverThread) {
+        serverThread->quit();
+        serverThread->wait();
+        delete serverThread;
+    }
     delete ui;
-    cap.release();
 }
 
 void MainWindow::captureFrame() {
@@ -44,19 +50,55 @@ void MainWindow::captureFrame() {
 
     // Scale image
     QPixmap pix = QPixmap::fromImage(img).scaled(
-        ui->label->size(),
+        // ui->label->size(),
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation
         );
 
     // Show in QLabel
-    ui->label->setPixmap(pix);
+    // ui->label->setPixmap(pix);
 }
 
-void MainWindow::on_startServerButton_clicked() {
+void MainWindow::on_startChat() {
     this->hide();
-    if (!serverWindow) {
-        serverWindow = new ServerWindow();
-        serverWindow->show();
+    if (!start_chatWindow) {
+        if (server == NULL) {
+            server = new MiniZoom::AppServer();
+        }
+        start_chatWindow = new StartChatWindow(this, server);
+        start_chatWindow->show();
+    }
+}
+
+void MainWindow::on_joinChat() {
+    this->hide();
+    if (!join_chatWindow) {
+        if (server == NULL) {
+            server = new MiniZoom::AppServer();
+        }
+        join_chatWindow = new JoinChatWindow(this, server);
+        join_chatWindow->show();
+    }
+}
+
+void MainWindow::on_shareFiles() {
+    this->hide();
+    if (!start_mediaWindow) {
+        if (server == NULL) {
+            server = new MiniZoom::AppServer();
+        }
+        start_mediaWindow = new StartFileShareWindow(this, server);
+        start_mediaWindow->show();
+    }
+}
+
+void MainWindow::on_joinFiles() {
+    this->hide();
+    if (!join_mediaWindow) {
+        if (server == NULL) {
+            server = new MiniZoom::AppServer();
+        }
+        join_mediaWindow = new JoinFileShareWindow(this, server);
+        join_mediaWindow->show();
     }
 }

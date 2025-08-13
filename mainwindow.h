@@ -3,12 +3,17 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QThread>
 #include <QImage>
 #include <QPixmap>
 #include <QPushButton>
 #include <opencv2/opencv.hpp>
 
 #include "serverwindow.h"
+#include "views/startchatwindow.h"
+#include "views/joinchatwindow.h"
+#include "views/startfilesharewindow.h"
+#include "views/joinfilesharewindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,13 +31,24 @@ public:
 
 private slots:
     void captureFrame();
-    void on_startServerButton_clicked();
+    void on_startChat();
+    void on_joinChat();
+    void on_shareFiles();
+    void on_joinFiles();
 
 private:
     Ui::MainWindow *ui;
     ServerWindow *serverWindow = nullptr; // new window instance
     cv::VideoCapture cap;
     QTimer *timer;
+
+    StartChatWindow *start_chatWindow = nullptr;
+    JoinChatWindow *join_chatWindow = nullptr;
+    StartFileShareWindow *start_mediaWindow = nullptr;
+    JoinFileShareWindow *join_mediaWindow = nullptr;
+
+    MiniZoom::AppServer* server;
+    QThread *serverThread;
 
 };
 #endif // MAINWINDOW_H
